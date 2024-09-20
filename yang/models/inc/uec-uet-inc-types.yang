@@ -1,0 +1,298 @@
+module uec-uet-inc-types {
+    yang-version "1.1";
+
+    namespace "http://ultraethernet.org/yang/uec-uet-inc-types";
+
+    prefix "uec-uet-inc-types";
+
+    import openconfig-extensions {
+        prefix oc-ext;
+    }
+
+    organization "Ultra Ethernet Consortium";
+
+    contact
+        "Ultra Ethernet Consortium
+        ultraethernet.org";
+
+    description
+        "This module defines types and identities used in models
+        related to UEC INC.
+
+        Copyright © UEC (2024).
+
+        This version of this YANG module is part of UEC 1.0. See the
+        specification itself for full legal notices.";
+
+    revision "2024-09-11" {
+        description
+          "Initial revision. Published as part of UEC 1.0.";
+        reference "UEC 1.0";
+    }
+
+    oc-ext:openconfig-version "0.1.0";
+
+    typedef job-id {
+        type uint32 {
+            range "0..16777215";
+        }
+    }
+
+    typedef pid-on-fep {
+        type uint16 {
+            range "0..4095";
+        }
+    }
+
+    typedef index {
+        type uint16 {
+            range "0..4095";
+        }
+    }
+
+    typedef pmtu {
+        type uint16 {
+            range "1024 | 2048 | 4096 | 8192";
+        }
+    }
+
+    typedef tc-value {
+        type uint16 {
+            range "0..7";
+        }
+    }
+
+    typedef tree-vertex-ref {
+        type leafref {
+            path '/uec-uet-inc:tree-vertices/' +
+                'uec-uet-inc:tree-vertex/' +
+                'uec-uet-inc:id';
+        }
+    }
+
+    typedef assoc-mode {
+        type enumeration {
+            enum NONE {
+                value 0;
+                description "No guarantees of consistent associativity";
+            }
+            enum CONSISTENT {
+                value 1;
+                description "Consistent for all reductions, but otherwise
+                undefined";
+            }
+            enum CONFIGURED {
+                value 2;
+                description "Consistent for all reductions, with
+                user-defined associativity";
+            }
+        }
+    }
+
+    identity DATA_TYPE {
+        description "Data type";
+    }
+
+    identity INT8 {
+        base DATA_TYPE;
+        description "Signed 8-bit integer";
+    }
+
+    identity UINT8 {
+        base DATA_TYPE;
+        description "Unsigned 8-bit integer";
+    }
+
+    identity INT16 {
+        base DATA_TYPE;
+        description "Signed 16-bit integer";
+    }
+
+    identity UINT16 {
+        base DATA_TYPE;
+        description "Unsigned 16-bit integer";
+    }
+
+    identity INT32 {
+        base DATA_TYPE;
+        description "Signed 32-bit integer";
+    }
+
+    identity UINT32 {
+        base DATA_TYPE;
+        description "Unsigned 32-bit integer";
+    }
+
+    identity INT64 {
+        base DATA_TYPE;
+        description "Signed 64-bit integer";
+    }
+
+    identity UINT64 {
+        base DATA_TYPE;
+        description "Unsigned 64-bit integer";
+    }
+
+    identity FP32 {
+        base DATA_TYPE;
+        description "IEEE 754 Single Precision";
+    }
+
+    identity FP64 {
+        base DATA_TYPE;
+        description "IEEE 754 Double Precision";
+    }
+
+    identity FP16 {
+        base DATA_TYPE;
+        description "IEEE 754 Half Precision";
+    }
+
+    identity BFLOAT16 {
+        base DATA_TYPE;
+        description "Brain Floating Point, BF16";
+    }
+
+    identity OFP8_E4M3 {
+        base DATA_TYPE;
+        description "OCP 8-bit Floating Point, 4-bit exponent, 3-bit manitssa";
+    }
+
+    identity OFP8_E5M2 {
+        base DATA_TYPE;
+        description "OCP 8-bit Floating Point, 5-bit exponent, 2-bit mantissa";
+    }
+
+    identity DATA_OPERATION {
+        description "Data operation";
+    }
+
+    identity SUM {
+        base DATA_OPERATION;
+        description "Sum";
+    }
+
+    identity SUM_SCALE {
+        base DATA_OPERATION;
+        description "Sum and scale";
+    }
+
+    identity PROD {
+        base DATA_OPERATION;
+        description "Product";
+    }
+
+    identity MIN {
+        base DATA_OPERATION;
+        description "Minimum";
+    }
+
+    identity MAX {
+        base DATA_OPERATION;
+        description "Maximum";
+    }
+
+    identity BOR {
+        base DATA_OPERATION;
+        description "Bitwise or";
+    }
+
+    identity BAND {
+        base DATA_OPERATION;
+        description "Bitwise and";
+    }
+
+    identity BXOR {
+        base DATA_OPERATION;
+        description "Bitwise exclusive or";
+    }
+
+    identity LOR {
+        base DATA_OPERATION;
+        description "Logical or";
+    }
+
+    identity LAND {
+        base DATA_OPERATION;
+        description "Logical and";
+    }
+
+    identity LXOR {
+        base DATA_OPERATION;
+        description "Logical exclusive or";
+    }
+
+    identity COLLECTIVE_TYPE {
+        description "Collective type";
+    }
+
+    identity BARRIER {
+        base COLLECTIVE_TYPE;
+        description "Barrier";
+    }
+
+    identity BROADCAST {
+        base COLLECTIVE_TYPE;
+        description "Broadcast";
+    }
+
+    identity ALL_TO_ALL {
+        base COLLECTIVE_TYPE;
+        description "All-to-all";
+    }
+
+    identity ALL_REDUCE {
+        base COLLECTIVE_TYPE;
+        description "All-reduce";
+    }
+
+    identity ALL_GATHER {
+        base COLLECTIVE_TYPE;
+        description "All-gather";
+    }
+
+    identity REDUCE_SCATTER {
+        base COLLECTIVE_TYPE;
+        description "Reduce-scatter";
+    }
+
+    identity REDUCE {
+        base COLLECTIVE_TYPE;
+        description "Reduce";
+    }
+
+    identity SCATTER {
+        base COLLECTIVE_TYPE;
+        description "Scatter";
+    }
+
+    identity GATHER {
+        base COLLECTIVE_TYPE;
+        description "Gather";
+    }
+
+    identity PROTOCOL_TYPE {
+        description "Protocol type";
+    }
+
+    identity LL_PUSH {
+        base PROTOCOL_TYPE;
+        description "LL-Push";
+    }
+
+    identity ENDPOINT_HANDLE_SCHEME {
+        description "Endpoint handle scheme";
+    }
+
+    identity UNRESTRICTED {
+        base ENDPOINT_HANDLE_SCHEME;
+        description "The IM may allocate any values to the sFEP endpoints.";
+    }
+
+    identity INDEX_ONLY {
+        base ENDPOINT_HANDLE_SCHEME;
+        description "The IM may allocate distinct Index values to the
+        endpoints, while keeping all other values 0.";
+    }
+}
+

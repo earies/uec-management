@@ -1,0 +1,610 @@
+module uec-uet-inc {
+    yang-version "1.1";
+
+    namespace "http://ultraethernet.org/yang/uec-uet-inc";
+
+    prefix "uec-uet-inc";
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import openconfig-interfaces {
+        prefix oc-if;
+    }
+
+    import openconfig-extensions {
+        prefix oc-ext;
+    }
+
+    import uec-uet-inc-types {
+        prefix inc;
+    }
+
+    organization "Ultra Ethernet Consortium";
+
+    contact
+        "Ultra Ethernet Consortium
+        ultraethernet.org";
+
+    description
+        "This module describes configuration and operational state
+        data for managing UET INC groups.
+        
+        Copyright © UEC (2024).
+        
+        This version of this YANG module is part of UEC 1.0. See the
+        specification itself for full legal notices.";
+
+    revision "2024-09-11" {
+        description
+          "Initial revision. Published as part of UEC 1.0.";
+        reference "UEC 1.0";
+    }
+
+    oc-ext:openconfig-version "0.1.0";
+
+    typedef tree-vertex-ref {
+        type leafref {
+            path '/uec-uet-inc:tree-vertices/' +
+                'uec-uet-inc:tree-vertex/' +
+                'uec-uet-inc:id';
+        }
+    }
+
+    grouping flow-control-info-top {
+        leaf cell-size {
+            type uint16;
+        }
+
+        leaf packet-overhead {
+            type uint16;
+        }
+    }
+
+    grouping group-config {
+        description "Configuration data for groups";
+    
+        leaf global-id {
+            type uint32;
+            description "The global group ID. This field is consistent
+            across all switches.";
+        }
+        
+        leaf pmtu {
+            type inc:pmtu;
+            description "The maximum data size that can be carried in a
+            packet";
+        }
+
+        leaf admin-status {
+            type enumeration {
+                enum DOWN {
+                    value 0;
+                    description "Down";
+                }
+                enum UP {
+                    value 1;
+                    description "Up";
+                }
+            }
+            description "Indicates whether the group is administratively
+            enabled to operate. Groups do not accept or generate traffic
+            while administratively down.";
+        }
+
+        leaf traffic-class-x {
+            type inc:tc-value;
+            description "Traffic class X used in the operation of the
+            group";
+        }
+
+        leaf traffic-class-y {
+            type inc:tc-value;
+            description "Traffic class Y used in the operation of the
+            group";
+        }
+
+        leaf job-id {
+            type inc:job-id;
+            description "The Job ID";
+        }
+
+        leaf scalar-factor {
+            type uint32;
+            description "The scalar factor by which sum-and-scale data is
+            divided.";
+        }
+
+        leaf protocol-type {
+            type identityref {
+                base inc:PROTOCOL_TYPE;
+            }
+            description "The protocol type used in the operation of the
+            group";
+        }
+
+        leaf bandwidth {
+            type uint32;
+            description "The bandwidth at which collectives can be run
+                for an individual member, in Gbps";
+        }
+
+        leaf assoc-mode {
+            type inc:assoc-mode;
+            description "The associativity mode used for arithmetic
+            operations";
+        }
+
+        leaf tree-vertex {
+            type tree-vertex-ref;
+            description "The offload tree vertex used in the operation of
+            this group";
+        }
+    }
+
+    grouping group-state {
+        description "";
+
+        leaf oper-status {
+            type enumeration {
+                enum ADMINISTRATIVELY_DOWN {
+                    value 0;
+                    description "Administratively down";
+                }
+                enum SETTING_UP {
+                    value 1;
+                    description "Group setup is in progress.";
+                }
+                enum UP {
+                    value 2;
+                    description "Up";
+                }
+                enum FAILED {
+                    value 3;
+                    description "Failed";
+                }
+            }
+            description "The group's operational status";
+        }
+
+        leaf failure-description {
+            type string;
+            description "Human-readable description of reason for group
+            failure, if applicable";
+        }
+
+        container counters {
+            /* TBD */
+        }
+    }
+
+    grouping groups-top {
+        description "";
+
+        container groups {
+            description "";
+
+            list group {
+                description "";
+                key "global-id";
+
+                leaf global-id {
+                    type leafref {
+                        path "../config/global-id";
+                    }
+                    description "";
+                }
+
+                container config {
+                    description "";
+                    uses group-config;
+                }
+
+                container state {
+                    config false;
+                    description "";
+
+                    container configured {
+                        uses group-config;
+                    }
+                    
+                    uses group-state;
+                }
+            }
+        }
+    }
+    
+    grouping tree-vertex-config {
+        description "";
+        leaf id {
+            type uint32;
+        }
+
+        leaf job-id {
+            type inc:job-id;
+            description "The Job ID";
+        }
+    }
+
+    grouping tree-vertex-state {
+        description "";
+
+        container counters {
+            /* TBD */
+        }
+    }
+
+    grouping sfep-config {
+        uses oc-if:interface-ref-common;
+
+        leaf local-fabric-address {
+            description "The local fabric address of the PDC(s).";
+            type inet:ip-address;
+        }
+    }
+
+    grouping sfep-state {
+        container counters {
+            /* TBD */
+        }
+    }
+
+    grouping peer-fep-config {
+        leaf remote-fabric-address {
+            description "The Fabric Address of the peer";
+            type inet:ip-address;
+        }
+
+        leaf role {
+            description "The role of the peer";
+            type enumeration {
+                enum UPLINK {
+                    value 0;
+                }
+                enum DOWNLINK {
+                    value 1;
+                }
+                enum LEAF {
+                    value 2;
+                }
+            }
+        }
+
+        container flow-control-info {
+            uses flow-control-info-top;
+        }
+    }
+
+    grouping peer-fep-state {
+        container counters {
+            /* TBD */
+        }
+    }
+
+    grouping endpoint-config {
+        leaf id {
+            type uint32;
+        }
+
+        leaf local-pid-on-fep {
+            description "The PIDonFEP of incoming collective
+            requests/replies and data";
+            type inc:pid-on-fep;
+        }
+
+        leaf local-index {
+            description "The index of incoming collective
+            requests/replies and data";
+            type inc:index;
+        }
+
+        leaf remote-pid-on-fep {
+            description "The PIDonFEP used to relay INC messages to the
+            endpoint";
+            type inc:pid-on-fep;
+        }
+
+        leaf remote-index {
+            description "The index used to relay INC messages to the
+            endpoint";
+            type inc:index;
+        }
+
+        leaf leaf-count {
+            description "The number of leaves in the INC tree downstream
+            of the endpoint";
+            type uint32;
+        }
+
+        leaf assoc-index {
+            description "The member’s index for the purpose of determining
+            associativity of arithmetic operations. Only set by the user in
+            case of “CONFIGURED” associativity mode.";
+            type uint32;
+        }
+
+        leaf-list serialized-gids {
+            description "The list of group IDs whose use by the endpoint
+            is guaranteed to be serialized with the current group";
+            type uint32;
+        }
+    }
+
+    grouping endpoint-state {
+        container counters {
+            /* TBD */
+        }
+    }
+
+    grouping endpoints-top {
+        description "";
+
+        container endpoints {
+            list endpoint {
+                key "id";
+
+                leaf id {
+                    type leafref {
+                        path "../config/id";
+                    }
+                }
+
+                container config {
+                    uses endpoint-config;
+                }
+
+                container state {
+                    config false;
+                    container configured {
+                        uses endpoint-config;
+                    }
+
+                    uses endpoint-state;
+                }
+            }
+        }
+    }
+
+    grouping peer-feps-top {
+        description "";
+
+        container peer-feps {
+            description "The sFEPs or mFEPs with which the sFEP is
+            interacting in the context of the current group.
+            Indexed by the remote fabric address.";
+
+            list peer-fep {
+                key "remote-fabric-address";
+
+                leaf remote-fabric-address {
+                    type leafref {
+                        path "../config/remote-fabric-address";
+                    }
+                }
+
+                container config {
+                    uses peer-fep-config;
+                }
+
+                container state {
+                    config false;
+                    container configured {
+                        uses peer-fep-config;
+                    }
+
+                    uses peer-fep-state;
+                }
+            }
+
+            uses endpoints-top;
+        }
+    }
+
+    grouping sfeps-top {
+        description "";
+
+        container sfeps {
+            description "sFEPs involved in the operation of a group.
+            Indexed by switch interface.";
+
+            list sfep {
+                key "interface";
+
+                leaf interface {
+                    type leafref {
+                        path "../config/interface";
+                    }
+                }
+
+                container config {
+                    uses sfep-config;
+                }
+
+                container state {
+                    config false;
+                    container configured {
+                        uses sfep-config;
+                    }
+
+                    uses sfep-state;
+                }
+            }
+
+            uses peer-feps-top;
+        }
+    }
+
+    grouping tree-vertices-top {
+        description "";
+
+        container tree-vertices {
+            description "";
+
+            list tree-vertex {
+                description "";
+                key "id";
+
+                leaf id {
+                    type leafref {
+                        path "../config/id";
+                    }
+                    description "";
+                }
+
+                container config {
+                    description "";
+                    uses tree-vertex-config;
+                }
+
+                container state {
+                    config false;
+                    description "";
+
+                    container configured {
+                        uses tree-vertex-config;
+                    }
+
+                    uses tree-vertex-state;
+
+                    }
+
+                uses sfeps-top;
+            }
+        }
+    }
+
+    grouping state-top  {
+        description "";
+
+        container state {
+            config false;
+            leaf max-groups {
+                type uint32;
+                description "The number of groups that can concurrently
+                be active on the switch";
+            }
+
+            leaf max-total-bandwidth {
+                type uint32;
+                description "The maximum total bandwidth at which
+                collectives can be run, in Gbps";
+            }
+
+            leaf max-member-bandwidth {
+                type uint32;
+                description "The maximum bandwidth at which collectives
+                can be run for an individual member, in Gbps";
+            }
+
+            leaf-list supported-data-types {
+                type identityref {
+                    base inc:DATA_TYPE;
+                }
+                description "The list of the supported data types";
+            }
+
+            leaf-list supported-data-operations {
+                type identityref {
+                    base inc:DATA_OPERATION;
+                }
+                description "The list of the supported data operations";
+            }
+
+            leaf-list supported-push-collectives {
+                type identityref {
+                    base inc:COLLECTIVE_TYPE;
+                }
+                description "The list of the supported collectives
+                for push-based protocol types";
+            }
+
+            leaf max-pmtu {
+                type inc:pmtu;
+                description "The maximum data size that can be carried
+                by a packet";
+                }
+
+            leaf max-sfeps {
+                type uint32;
+                description "The maximum number of sFEPs that can be
+                employed across all groups";
+            }
+
+            leaf max-sfeps-per-group {
+                type uint32;
+                description "The maximum number of sFEPs that can be
+                part of a group";
+            }
+
+            leaf max-peer-feps-per-sfep {
+                type uint32;
+                description "The maximum number of sFEPs that with which
+                a local sFEP can peer.";
+            }
+
+            leaf max-endpoints {
+                type uint32;
+                description "The maximum number of endpoints that can
+                take part in collective operations at the same time.";
+            }
+
+            leaf max-endpoints-per-group {
+                type uint32;
+                description "The maximum number of endpoints that can be
+                part of a group";
+            }
+
+            leaf max-endpoints-per-sfep {
+                type uint32;
+                description "The maximum number of endpoints that can
+                peer with a single sFEP";
+            }
+
+            leaf max-groups-per-sfep {
+                type uint32;
+                description "The maximum number of groups that can operate
+                on an sFEP";
+            }
+
+            leaf local-endpoint-handle-scheme {
+                type identityref {
+                    base inc:ENDPOINT_HANDLE_SCHEME;
+                }
+                description "The scheme that must be used by the IM to
+                allocate local PIDonFEP and Index values for member nodes";
+            }
+
+            leaf-list available-protocol-types {
+                type identityref {
+                    base inc:PROTOCOL_TYPE;
+                }
+                description "The list of all available INC protocol types";
+            }
+
+            leaf max-outstanding-collectives {
+                type uint32;
+                description "The maximum number of collectives that can
+                be initiated by a member without waiting for completion";
+            }
+
+            leaf-list supported-assoc-modes {
+                type inc:assoc-mode;
+                description "The list of supported associativity modes";
+            }
+
+            leaf serialization-supported {
+                type boolean;
+                description "Whether or not serialization is supported";
+            }
+
+            container flow-control-info {
+                uses flow-control-info-top;
+            }
+        }
+    }
+
+   uses groups-top;
+   uses tree-vertices-top;
+   uses state-top;
+}

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+package uec_uet_inc_im;
+
+service INCManagement {
+  // Configures the IM for operation within a new job.
+  rpc CreateJob(JobCreationRequest) returns (google.protobuf.Empty);
+  // Destroys a job.
+  // All gRPC streams to the members are also closed.
+  rpc DestroyJob(google.protobuf.UInt32Value) returns (google.protobuf.Empty);
+}
+
+message JobCreationRequest {
+  // The Job ID.
+  uint32 job_id = 1;
+  // A list of X.509 certificates used by members for authentication.
+  // If empty, no authentication is required. Otherwise, members must
+  // authenticate.
+  repeated bytes certificates = 2;
+}

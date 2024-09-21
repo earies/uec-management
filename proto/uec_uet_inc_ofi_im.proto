@@ -1,0 +1,207 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package uec_uet_inc_im;
+
+service INCMembership {
+  // Register a member with the IM.
+  rpc Register(RegistrationRequest) returns (RegistrationReply);
+  // De-register a member from the IM.
+  // Also leaves any groups that the member is part of.
+  rpc Deregister(RegistrationRequest) returns (google.protobuf.Empty);
+
+  // Query the INC capabilities of the fabric.
+  // Until a specific group is formed, the final capabilities may not
+  // be known if the fabric consists of switches with different 
+  // capabilities.
+  rpc GetCapabilities(google.protobuf.Empty) returns (CapabilitiesResponse);
+
+  // Join a group.
+  // A group is established after all members have attempted to join.
+  // Group creation MUST fail if the required network resources and/or
+  // capabilities is not provided.
+  // A group is established after all members have attempted to join.
+  // This RPC is idempotent and safe to call again in case of a timeout.
+  // The member must be registered before calling this.
+  rpc GroupJoin (GroupJoinRequest) returns (GroupJoinReply);
+  // Leave a group.
+  // This is irrevocable and kills the group.
+  // The member must be registered before calling this.
+  rpc GroupLeave(GroupLeaveRequest) returns (google.protobuf.Empty);
+  // Fetch the list of failed groups.
+  // The member must be registered before calling this.
+  rpc GroupStatus(AddressingInfo) returns (GroupStatusReply);
+  // Fetch the list of failed groups and receive streaming updates as
+  // groups fail.
+  // Leaving the stream open is the suggested way of generating heartbeats.
+  // The member must be registered before calling this.
+  rpc StreamingGroupStatus(AddressingInfo)
+    returns (stream GroupStatusReply);
+}
+
+// Local addressing information for one entity participating in INC
+message AddressingInfo {
+  uint32 job_id = 1;
+  //The IP address of the FEP. Can be either v4 or v6.
+  bytes ip = 2;
+  uint32 pid_on_fep = 3;
+  uint32 index = 4;
+}
+
+enum Collective {
+  BARRIER = 0;
+  ALL_REDUCE = 1;
+  REDUCE = 2;
+  REDUCE_SCATTER = 3;
+  BROADCAST = 4;
+  SCATTER = 5;
+  GATHER = 6;
+  ALL_GATHER = 7;
+}
+
+enum DataType {
+  INT8 = 0;
+  INT16 = 1;
+  INT32 = 2;
+  INT64 = 3;
+  UINT8 = 4;
+  UINT16 = 5;
+  UINT32 = 6;
+  UINT64 = 7;
+  FP16 = 8;
+  FP32 = 9;
+  FP64 = 10;
+  BFLOAT16 = 11;
+  OFP8_E4M3 = 12;
+  OFP8_E5M2 = 13;
+}
+
+enum DataOperation {
+  SUM = 0;
+  SUM_SCALE = 1;
+  BOR = 2;
+  LOR = 3;
+  BXOR = 4;
+  LXOR = 5;
+}
+
+enum Reproducibility {
+  // Arithmetic operations are reproducible if re-run by the same group.
+  GROUP = 0;
+}
+
+enum ProtocolType {
+  LL_PUSH = 0;
+}
+
+// Indicates what INC functionality can be provided by the fabric
+message Capabilities {
+  repeated Collective collectives = 1;
+  // Little-endian data types
+  repeated DataType le_data_types = 2;
+  repeated DataOperation data_operations = 3;
+  repeated Reproducibility reproducibility = 4;
+  repeated ProtocolType protocol_types = 5;
+  // The maximum data MTU
+  optional uint32 mtu = 6;
+  // The bandwidth for collectives
+  optional uint32 bandwidth = 7;
+}
+
+message FlowControlInfo {
+  uint32 cell_size = 1;
+  uint32 packet_overhead = 2;
+}
+
+message RegistrationRequest {
+  // The member's addressing information.
+  AddressingInfo member_addr = 1;
+  // The data MTU supported by the member
+  uint32 mtu = 2;
+  FlowControlInfo flow_control_info = 3;
+}
+
+message RegistrationReply {
+  // The expected interval between heartbeats in milliseconds
+  // A heartbeat_interval of 0 means that no heartbeats are expected
+  uint32 heartbeat_interval = 1;
+  // The period (in milliseconds) after which the IM is considered
+  // unreachable
+  // if it has not streamed a response or sent a keepalive ping for
+  // an open stream
+  uint32 stream_timeout = 2;
+}
+
+message CapabilitiesResponse {
+  // The INC capabilities that are available to any potential group
+  Capabilities guaranteed_capabilities = 1;
+  // The best-case capabilities that could be available to an arbitrary
+  // group
+  // This is a superset of guaranteed_capabilities.
+  Capabilities max_capabilities = 2;
+}
+
+message GroupJoinRequest {
+  // The member's addressing information.
+  AddressingInfo member_addr = 1;
+  // A 0-indexed integer indicating the member's position in a group
+  uint32 member_id = 2;
+  // A 16-byte group creation handle
+  // All members must supply the same value.
+  // The handle must not be reused until all members have explicitly
+  // left the group.
+  // This field was sized such that it can house a *CCL Unique ID.
+  bytes creation_handle = 3;
+  // A 16-byte serialization handle
+  // The member must serialize all groups that it joins using thre same
+  // serialization handle.
+  repeated bytes serialization_handle = 4;
+  // The number of members in the group
+  uint32 member_count = 5;
+  // The capabilities required for group operation.
+  // Group creation MUST fail if these can not be provided.
+  optional Capabilities required_capabilities = 6;
+  // A hint for the IM indicating which capabilities are desired for group
+  // operation
+  // The IM may or may not honor this request.
+  optional Capabilities desired_capabilities = 7;
+  // The scalar factor by which sum-and-scale data is divided
+  uint32 scalar_factor = 8;
+}
+
+message GroupJoinReply {
+  // The addressing information for the data PDC
+  AddressingInfo data_info = 1;
+  // The maximum number of outstanding collectives
+  uint32 in_flight_ops = 2;
+  // The INC capabilities available to the group
+  // Contains exactly one protocol type.
+  Capabilities capabilities = 3;
+  // Whether the member may re-use a PDC associated with a serialized
+  // group for the operation of the new group
+  bool reuse_pdc = 4;
+  // The sFEP's flow control info
+  FlowControlInfo flow_control_info = 5;
+}
+
+enum LeaveReason {
+  NO_ERROR = 0;
+  GENERIC_ERROR = 1;
+}
+
+message GroupLeaveRequest {
+  // The group's creation handle
+  bytes creation_handle = 1;
+  // The member's addressing information
+  AddressingInfo member_info = 2;
+  // The reason for leaving
+  LeaveReason reason = 3;
+  // A vendor-specific description of the reason for leaving the group
+  string message = 4;
+}
+
+message GroupStatusReply {
+  // The list of failed groups that the rank has not explicitly left
+  repeated bytes failed_groups = 1;
+}

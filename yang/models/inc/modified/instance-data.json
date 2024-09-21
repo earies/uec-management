@@ -1,0 +1,28 @@
+{
+    "uec-uet-inc:groups": {
+        "group": [
+            {
+                "global-id": 100,
+                "config": {
+                    "global-id": 100,
+                    "pmtu": 8192
+                }
+            }
+        ]
+    },
+    "uec-uet-inc:tree-vertices": {
+        "tree-vertex": [
+            {
+                "id": 1,
+                "config": {
+                    "id": 1
+                }
+            }
+        ]
+    },
+    "uec-uet-inc:state": {
+        "max-groups": 100,
+        "max-total-bandwidth": 10000,
+        "max-member-bandwidth": 5000
+    }
+}

@@ -1,0 +1,119 @@
+module: uec-uet-inc
+  +--rw groups
+  |  +--rw group* [global-id]
+  |     +--rw global-id    -> ../config/global-id
+  |     +--rw config
+  |     |  +--rw global-id?         uint32
+  |     |  +--rw pmtu?              inc:pmtu
+  |     |  +--rw admin-status?      enumeration
+  |     |  +--rw traffic-class-x?   inc:tc-value
+  |     |  +--rw traffic-class-y?   inc:tc-value
+  |     |  +--rw job-id?            inc:job-id
+  |     |  +--rw scalar-factor?     uint32
+  |     |  +--rw protocol-type?     identityref
+  |     |  +--rw bandwidth?         uint32
+  |     |  +--rw assoc-mode?        inc:assoc-mode
+  |     |  +--rw tree-vertex?       tree-vertex-ref
+  |     +--ro state
+  |        +--ro configured
+  |        |  +--ro global-id?         uint32
+  |        |  +--ro pmtu?              inc:pmtu
+  |        |  +--ro admin-status?      enumeration
+  |        |  +--ro traffic-class-x?   inc:tc-value
+  |        |  +--ro traffic-class-y?   inc:tc-value
+  |        |  +--ro job-id?            inc:job-id
+  |        |  +--ro scalar-factor?     uint32
+  |        |  +--ro protocol-type?     identityref
+  |        |  +--ro bandwidth?         uint32
+  |        |  +--ro assoc-mode?        inc:assoc-mode
+  |        |  +--ro tree-vertex?       tree-vertex-ref
+  |        +--ro oper-status?           enumeration
+  |        +--ro failure-description?   string
+  |        +--ro counters
+  +--rw tree-vertices
+  |  +--rw tree-vertex* [id]
+  |     +--rw id        -> ../config/id
+  |     +--rw config
+  |     |  +--rw id?       uint32
+  |     |  +--rw job-id?   inc:job-id
+  |     +--ro state
+  |     |  +--ro configured
+  |     |  |  +--ro id?       uint32
+  |     |  |  +--ro job-id?   inc:job-id
+  |     |  +--ro counters
+  |     +--rw sfeps
+  |        +--rw sfep* [interface]
+  |        |  +--rw interface    -> ../config/interface
+  |        |  +--rw config
+  |        |  |  +--rw interface?              -> /oc-if:interfaces/interface/name
+  |        |  |  +--rw subinterface?           -> /oc-if:interfaces/interface[oc-if:name=current()/../interface]/subinterfaces/subinterface/index
+  |        |  |  +--rw local-fabric-address?   inet:ip-address
+  |        |  +--ro state
+  |        |     +--ro configured
+  |        |     |  +--ro interface?              -> /oc-if:interfaces/interface/name
+  |        |     |  +--ro subinterface?           -> /oc-if:interfaces/interface[oc-if:name=current()/../interface]/subinterfaces/subinterface/index
+  |        |     |  +--ro local-fabric-address?   inet:ip-address
+  |        |     +--ro counters
+  |        +--rw peer-feps
+  |           +--rw peer-fep* [remote-fabric-address]
+  |           |  +--rw remote-fabric-address    -> ../config/remote-fabric-address
+  |           |  +--rw config
+  |           |  |  +--rw remote-fabric-address?   inet:ip-address
+  |           |  |  +--rw role?                    enumeration
+  |           |  |  +--rw flow-control-info
+  |           |  |     +--rw cell-size?         uint16
+  |           |  |     +--rw packet-overhead?   uint16
+  |           |  +--ro state
+  |           |     +--ro configured
+  |           |     |  +--ro remote-fabric-address?   inet:ip-address
+  |           |     |  +--ro role?                    enumeration
+  |           |     |  +--ro flow-control-info
+  |           |     |     +--ro cell-size?         uint16
+  |           |     |     +--ro packet-overhead?   uint16
+  |           |     +--ro counters
+  |           +--rw endpoints
+  |              +--rw endpoint* [id]
+  |                 +--rw id        -> ../config/id
+  |                 +--rw config
+  |                 |  +--rw id?                  uint32
+  |                 |  +--rw local-pid-on-fep?    inc:pid-on-fep
+  |                 |  +--rw local-index?         inc:index
+  |                 |  +--rw remote-pid-on-fep?   inc:pid-on-fep
+  |                 |  +--rw remote-index?        inc:index
+  |                 |  +--rw leaf-count?          uint32
+  |                 |  +--rw assoc-index?         uint32
+  |                 |  +--rw serialized-gids*     uint32
+  |                 +--ro state
+  |                    +--ro configured
+  |                    |  +--ro id?                  uint32
+  |                    |  +--ro local-pid-on-fep?    inc:pid-on-fep
+  |                    |  +--ro local-index?         inc:index
+  |                    |  +--ro remote-pid-on-fep?   inc:pid-on-fep
+  |                    |  +--ro remote-index?        inc:index
+  |                    |  +--ro leaf-count?          uint32
+  |                    |  +--ro assoc-index?         uint32
+  |                    |  +--ro serialized-gids*     uint32
+  |                    +--ro counters
+  +--ro state
+     +--ro max-groups?                     uint32
+     +--ro max-total-bandwidth?            uint32
+     +--ro max-member-bandwidth?           uint32
+     +--ro supported-data-types*           identityref
+     +--ro supported-data-operations*      identityref
+     +--ro supported-push-collectives*     identityref
+     +--ro max-pmtu?                       inc:pmtu
+     +--ro max-sfeps?                      uint32
+     +--ro max-sfeps-per-group?            uint32
+     +--ro max-peer-feps-per-sfep?         uint32
+     +--ro max-endpoints?                  uint32
+     +--ro max-endpoints-per-group?        uint32
+     +--ro max-endpoints-per-sfep?         uint32
+     +--ro max-groups-per-sfep?            uint32
+     +--ro local-endpoint-handle-scheme?   identityref
+     +--ro available-protocol-types*       identityref
+     +--ro max-outstanding-collectives?    uint32
+     +--ro supported-assoc-modes*          inc:assoc-mode
+     +--ro serialization-supported?        boolean
+     +--ro flow-control-info
+        +--ro cell-size?         uint16
+        +--ro packet-overhead?   uint16
